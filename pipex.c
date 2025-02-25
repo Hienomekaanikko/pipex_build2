@@ -74,23 +74,37 @@ void	prep_env(t_data *data, int argc, char **argv)
 	}
 }
 
-void	child_one(t_data *data, char **argv)
+void	child_one(t_data *data, char **argv, char **envp)
 {
 	if (data->pid1 == -1)
 		ft_exit(data, "fork for child one failed", 1);
 	if (data->pid1 == 0)
 	{
+		dup2(data->in, 0);
 		dup2(data->pipe[1], 1);
+		close(data->pipe[0]);
+		close(data->pipe[1]);
+		close(data->in);
+		close(data->out);
+		if (execve(data->path, data->cmd1, envp))
+			ft_exit(data, "Execve failed in child one", 1);
 	}
 }
 
-void	child_two(t_data *data, char **argv)
+void	child_two(t_data *data, char **argv, char **envp)
 {
 	if (data->pid2 == -1)
 		ft_exit(data, "fork for child two failed", 1);
 	if (data->pid2 == 0)
 	{
+		dup2(data->out, 1);
 		dup2(data->pipe[0], 0);
+		close(data->pipe[0]);
+		close(data->pipe[1]);
+		close(data->in);
+		close(data->out);
+		if (execve(data->path, data->cmd2, envp))
+			ft_exit(data, "Execve failed in child two", 1);
 	}
 }
 
@@ -104,10 +118,10 @@ int	main(int argc, char **argv, char **envp)
 		prep_env(&data, argc, argv);
 		get_path(&data, argv[2], envp);
 		data.pid1 = fork();
-		child_one(&data, data.pid1);
+		child_one(&data, data.pid1, envp);
 		get_path(&data, argv[3], envp);
 		data.pid2 = fork();
-		child_two(&data, data.pid2);
+		child_two(&data, data.pid2, envp);
 	}
 	ft_exit(&data, "Invalid amount of arguments", 1);
 }
