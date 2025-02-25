@@ -12,9 +12,10 @@
 
 #include "pipex.h"
 
-void	init_data(t_data *data)
+void	init_data(t_data *data, char *argv)
 {
-	data->cmd = NULL;
+	data->cmd1 = argv[2];
+	data->cmd2 = argv[3];
 	data->paths = NULL;
 	data->path = NULL;
 }
@@ -28,6 +29,32 @@ void	ft_exit(t_data *data, char *msg, int exitcode)
 	if (msg != NULL)
 		perror(msg);
 	exit(exitcode);
+}
+
+void	get_path(t_data *data, char *cmd, char **envp)
+{
+	int		i;
+	char	*path;
+
+	i = 0;
+	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
+		i++;
+	if (!envp[i])
+		ft_exit(data, "path not found", 1);
+	data->paths = ft_split(envp[i] + 5, ':');
+	i = 0;
+	while (data->paths[i])
+	{
+		path = ft_strjoin(data->paths, "/");
+		data->path = ft_strjoin(path, cmd);
+		free(path);
+		if (access(data->path, F_OK | X_OK) == 0)
+			return ;
+		free(data->path);
+		data->path = NULL;
+		i++;
+	}
+	ft_exit(data, "command not found", 1);
 }
 
 void	prep_env(t_data *data, int argc, char **argv, char **envp)
@@ -45,6 +72,7 @@ void	prep_env(t_data *data, int argc, char **argv, char **envp)
 		close(data->out);
 		ft_exit(data, "pipe failed", 1);
 	}
+	get_path(data, data->cmd1, envp);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -53,8 +81,8 @@ int	main(int argc, char **argv, char **envp)
 
 	if (argc == 5)
 	{
-		init_data(&data);
-		prep_env(&data, argc, argv);
+		init_data(&data, argv);
+		prep_env(&data, argc, argv, envp);
 	}
 	ft_exit(&data, "Invalid amount of arguments", 1);
 }
