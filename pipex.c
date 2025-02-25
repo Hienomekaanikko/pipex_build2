@@ -97,8 +97,8 @@ void	child_two(t_data *data, char **argv, char **envp)
 		ft_exit(data, "fork for child two failed", 1);
 	if (data->pid2 == 0)
 	{
-		dup2(data->out, 1);
 		dup2(data->pipe[0], 0);
+		dup2(data->out, 1);
 		close(data->pipe[0]);
 		close(data->pipe[1]);
 		close(data->in);
