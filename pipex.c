@@ -57,7 +57,7 @@ void	get_path(t_data *data, char *cmd, char **envp)
 	ft_exit(data, "command not found", 1);
 }
 
-void	prep_env(t_data *data, int argc, char **argv, char **envp)
+void	prep_env(t_data *data, int argc, char **argv)
 {
 	if (data->in = open(argv[1], O_RDONLY) < 0)
 		ft_exit(data, "input fail", 1);
@@ -72,7 +72,26 @@ void	prep_env(t_data *data, int argc, char **argv, char **envp)
 		close(data->out);
 		ft_exit(data, "pipe failed", 1);
 	}
-	get_path(data, data->cmd1, envp);
+}
+
+void	child_one(t_data *data, char **argv)
+{
+	if (data->pid1 == -1)
+		ft_exit(data, "fork for child one failed", 1);
+	if (data->pid1 == 0)
+	{
+		dup2(data->pipe[1], 1);
+	}
+}
+
+void	child_two(t_data *data, char **argv)
+{
+	if (data->pid2 == -1)
+		ft_exit(data, "fork for child two failed", 1);
+	if (data->pid2 == 0)
+	{
+		dup2(data->pipe[0], 0);
+	}
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -82,7 +101,13 @@ int	main(int argc, char **argv, char **envp)
 	if (argc == 5)
 	{
 		init_data(&data, argv);
-		prep_env(&data, argc, argv, envp);
+		prep_env(&data, argc, argv);
+		get_path(&data, argv[2], envp);
+		data.pid1 = fork();
+		child_one(&data, data.pid1);
+		get_path(&data, argv[3], envp);
+		data.pid2 = fork();
+		child_two(&data, data.pid2);
 	}
 	ft_exit(&data, "Invalid amount of arguments", 1);
 }
