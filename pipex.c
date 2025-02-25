@@ -12,10 +12,10 @@
 
 #include "pipex.h"
 
-void	init_data(t_data *data, char *argv)
+void	init_data(t_data *data, char **argv)
 {
-	data->cmd1 = argv[2];
-	data->cmd2 = argv[3];
+	data->cmd1 = ft_split(argv[2], ' ');
+	data->cmd2 = ft_split(argv[3], ' ');
 	data->paths = NULL;
 	data->path = NULL;
 }
@@ -61,7 +61,7 @@ void	prep_env(t_data *data, int argc, char **argv)
 {
 	if ((data->in = open(argv[1], O_RDONLY)) < 0)
 		ft_exit(data, "input fail", 1);
-	if ((data->out = open (argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644)) < 0)
+	if ((data->out = open(argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644)) < 0)
 	{
 		close(data->in);
 		ft_exit(data, "output fail", 1);
@@ -103,6 +103,7 @@ void	child_two(t_data *data, char **envp)
 		close(data->pipe[1]);
 		close(data->in);
 		close(data->out);
+		// Pass command as an array to execve
 		if (execve(data->path, data->cmd2, envp) == -1)
 			ft_exit(data, "Execve failed in child two", 1);
 	}
@@ -116,12 +117,13 @@ int	main(int argc, char **argv, char **envp)
 	{
 		init_data(&data, argv);
 		prep_env(&data, argc, argv);
-		get_path(&data, argv[2], envp);
+		get_path(&data, data.cmd1[0], envp);
 		data.pid1 = fork();
 		child_one(&data, envp);
-		get_path(&data, argv[3], envp);
+		get_path(&data, data.cmd2[0], envp);
 		data.pid2 = fork();
 		child_two(&data, envp);
 	}
-	ft_exit(&data, "Invalid amount of arguments", 1);
+	else
+		ft_exit(&data, "Invalid amount of arguments", 1);
 }

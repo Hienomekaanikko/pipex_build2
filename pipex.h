@@ -24,8 +24,8 @@ typedef struct s_data
 {
 	pid_t	pid1;
 	pid_t	pid2;
-	char	*cmd1;
-	char	*cmd2;
+	char	**cmd1;
+	char	**cmd2;
 	char	**paths;
 	char	*path;
 	int		pipe[2];

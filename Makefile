@@ -6,7 +6,6 @@ CC		= cc
 CFLAGS	= -Wall -Wextra -Werror
 
 SRC = pipex.c \
-		utils.c \
 
 OBJS = $(SRC:.c=.o)
 
