@@ -59,9 +59,9 @@ void	get_path(t_data *data, char *cmd, char **envp)
 
 void	prep_env(t_data *data, int argc, char **argv)
 {
-	if (data->in = open(argv[1], O_RDONLY) < 0)
+	if ((data->in = open(argv[1], O_RDONLY)) < 0)
 		ft_exit(data, "input fail", 1);
-	if (data->out = open (argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644) < 0)
+	if ((data->out = open (argv[argc - 1], O_TRUNC | O_CREAT | O_RDWR, 0644)) < 0)
 	{
 		close(data->in);
 		ft_exit(data, "output fail", 1);
@@ -86,7 +86,7 @@ void	child_one(t_data *data, char **argv, char **envp)
 		close(data->pipe[1]);
 		close(data->in);
 		close(data->out);
-		if (execve(data->path, data->cmd1, envp))
+		if (execve(data->path, data->cmd1, envp) == -1)
 			ft_exit(data, "Execve failed in child one", 1);
 	}
 }
@@ -103,7 +103,7 @@ void	child_two(t_data *data, char **argv, char **envp)
 		close(data->pipe[1]);
 		close(data->in);
 		close(data->out);
-		if (execve(data->path, data->cmd2, envp))
+		if (execve(data->path, data->cmd2, envp) == -1)
 			ft_exit(data, "Execve failed in child two", 1);
 	}
 }
